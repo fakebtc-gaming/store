@@ -293,6 +293,17 @@
       box-shadow: 0 0 20px var(--accent-glow);
     }
 
+    /* Avatar ring turns red when Kick is live */
+    .avatar-ring.is-live {
+      background: linear-gradient(135deg, #ff3b3b, #cc0000);
+      animation: ring-glow-live 2s ease-in-out infinite;
+    }
+
+    @keyframes ring-glow-live {
+      0%, 100% { box-shadow: 0 0 12px rgba(255, 59, 59, 0.4); }
+      50% { box-shadow: 0 0 24px rgba(255, 59, 59, 0.5), 0 0 48px rgba(255, 59, 59, 0.15); }
+    }
+
     /* ─── Section label ─── */
     .section-label {
       font-family: var(--font-display);
@@ -659,7 +670,7 @@
 <div class="splash" id="splash">
   <div class="splash-rain" id="splash-rain"></div>
   <div class="splash-center">
-    <div class="splash-title">FAKEBTC</div>
+    <div class="splash-title">FakeBTC Store</div>
     <div class="splash-sub">Gear up &middot; Game on</div>
   </div>
 </div>
@@ -700,7 +711,7 @@
       >
       <div class="avatar-fallback" id="avatar-fallback">FB</div>
     </div>
-    <h1 class="site-title">FAKEBTC</h1>
+    <h1 class="site-title">FakeBTC Store</h1>
     <p class="site-subtitle">Gear up. Game on. Stream hard.</p>
   </header>
 
@@ -909,6 +920,10 @@ function showLivePreview(stream) {
 
   // Add live glow to the button
   kickBtn.classList.add('is-live');
+
+  // Turn avatar ring red
+  var ring = document.querySelector('.avatar-ring');
+  if (ring) ring.classList.add('is-live');
 
   // Update button text to show LIVE
   kickBtn.innerHTML =
