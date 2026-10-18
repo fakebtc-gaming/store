@@ -159,11 +159,19 @@
     /* ─── Social bar ─── */
     .social-bar {
       display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 36px;
+      animation: fade-up 0.6s ease-out 0.15s both;
+    }
+
+    .social-row {
+      display: flex;
       flex-wrap: wrap;
       gap: 10px;
       justify-content: center;
-      margin-bottom: 36px;
-      animation: fade-up 0.6s ease-out 0.15s both;
+      width: 100%;
     }
 
     .social-btn {
@@ -182,6 +190,18 @@
       transition: all 0.25s ease;
     }
 
+    .social-btn.featured {
+      width: 100%;
+      justify-content: center;
+      padding: 14px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      background: linear-gradient(135deg, rgba(0, 229, 255, 0.1), rgba(0, 229, 255, 0.04));
+      border-color: var(--accent-dim);
+      color: var(--accent);
+      letter-spacing: 0.3px;
+    }
+
     .social-btn:hover {
       background: var(--bg-card-hover);
       border-color: var(--accent);
@@ -190,10 +210,87 @@
       box-shadow: 0 6px 20px var(--accent-glow);
     }
 
+    .social-btn.featured:hover {
+      background: linear-gradient(135deg, rgba(0, 229, 255, 0.18), rgba(0, 229, 255, 0.08));
+    }
+
     .social-btn svg {
       width: 18px;
       height: 18px;
       flex-shrink: 0;
+    }
+
+    /* ─── Live stream mini-preview (injected by JS when live) ─── */
+    .live-mini {
+      width: 100%;
+      margin-top: 6px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--accent-dim);
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.12);
+      animation: stream-in 0.4s ease-out;
+    }
+
+    @keyframes stream-in {
+      from { opacity: 0; max-height: 0; margin-top: 0; }
+      to { opacity: 1; max-height: 300px; margin-top: 6px; }
+    }
+
+    .live-mini-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      background: rgba(0, 0, 0, 0.4);
+      font-family: var(--font-display);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #ff3b3b;
+      animation: live-pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes live-pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(255, 59, 59, 0.5); }
+      50% { opacity: 0.7; box-shadow: 0 0 0 5px rgba(255, 59, 59, 0); }
+    }
+
+    .live-mini-viewer {
+      margin-left: auto;
+      color: var(--fg-dim);
+      font-size: 10px;
+      letter-spacing: 0;
+      font-weight: 500;
+    }
+
+    .live-mini-embed {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000;
+    }
+
+    .live-mini-embed iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    /* When live, restyle the featured Kick button */
+    .social-btn.featured.is-live {
+      border-color: var(--accent);
+      box-shadow: 0 0 20px var(--accent-glow);
     }
 
     /* ─── Section label ─── */
@@ -356,10 +453,10 @@
       padding-top: 10px;
     }
 
-    .product-price {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 18px;
+    .view-label {
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 13px;
       color: var(--accent);
     }
 
@@ -406,12 +503,8 @@
       position: fixed;
       inset: 0;
       z-index: 9999;
-      background: #0c0e14;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 28px;
+      background: var(--bg);
+      overflow: hidden;
       transition: opacity 0.4s ease, visibility 0.4s ease;
     }
     .splash.done {
@@ -420,104 +513,75 @@
       pointer-events: none;
     }
 
-    .splash-logo {
-      font-family: var(--font-display);
-      font-size: clamp(36px, 10vw, 64px);
-      font-weight: 700;
-      letter-spacing: 6px;
-      color: #00e5ff;
-      position: relative;
-      animation: glitch-text 0.4s ease-in-out 0.15s both;
-      text-shadow:
-        0 0 10px rgba(0, 229, 255, 0.6),
-        0 0 40px rgba(0, 229, 255, 0.3),
-        0 0 80px rgba(0, 229, 255, 0.15);
-    }
-    .splash-logo::before,
-    .splash-logo::after {
-      content: 'FAKEBTC';
+    /* Falling doodle icons */
+    .splash-rain {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-    }
-    .splash-logo::before {
-      color: #ff003c;
-      animation: glitch-1 0.8s ease-in-out 0.2s 2;
-      clip-path: inset(20% 0 30% 0);
-    }
-    .splash-logo::after {
-      color: #00ff88;
-      animation: glitch-2 0.8s ease-in-out 0.3s 2;
-      clip-path: inset(60% 0 5% 0);
-    }
-
-    .splash-scanline {
-      position: absolute;
-      width: 100%;
-      height: 3px;
-      background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.5), transparent);
-      top: 0;
-      animation: scanline 1.2s linear;
-    }
-
-    .splash-bar-track {
-      width: min(240px, 60vw);
-      height: 3px;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 3px;
+      inset: 0;
       overflow: hidden;
     }
-    .splash-bar-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #00e5ff, #00ff88);
-      border-radius: 3px;
-      animation: load-bar 1s ease-out forwards;
-      box-shadow: 0 0 12px rgba(0, 229, 255, 0.5);
+
+    .doodle {
+      position: absolute;
+      top: -60px;
+      opacity: 0;
+      animation: doodle-fall 1.4s ease-in forwards;
     }
 
-    .splash-tagline {
+    .doodle svg {
+      width: 32px;
+      height: 32px;
+      stroke: var(--accent);
+      fill: none;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 0 6px var(--accent-glow));
+    }
+
+    /* Center logo over the rain */
+    .splash-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      z-index: 1;
+    }
+
+    .splash-title {
+      font-family: var(--font-display);
+      font-size: clamp(32px, 9vw, 56px);
+      font-weight: 700;
+      letter-spacing: 4px;
+      color: var(--accent);
+      opacity: 0;
+      animation: logo-pop 0.5s ease-out 0.2s forwards;
+      text-shadow:
+        0 0 20px var(--accent-glow),
+        0 0 60px rgba(0, 229, 255, 0.15);
+    }
+
+    .splash-sub {
       font-family: var(--font-body);
-      font-size: 12px;
+      font-size: 11px;
       letter-spacing: 3px;
       text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.3);
-      animation: fade-in 0.4s ease 0.3s both;
+      color: var(--fg-dim);
+      opacity: 0;
+      animation: logo-pop 0.4s ease-out 0.45s forwards;
     }
 
-    @keyframes glitch-text {
-      0% { opacity: 0; transform: scale(0.95) translateY(8px); }
-      50% { opacity: 1; transform: scale(1.02) translateY(-2px); }
-      100% { opacity: 1; transform: scale(1) translateY(0); }
+    @keyframes logo-pop {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
     }
-    @keyframes glitch-1 {
-      0%, 100% { transform: none; }
-      20% { transform: translate(-3px, -1px); }
-      40% { transform: translate(3px, 1px); }
-      60% { transform: translate(-1px, 2px); }
-      80% { transform: translate(2px, -1px); }
-    }
-    @keyframes glitch-2 {
-      0%, 100% { transform: none; }
-      25% { transform: translate(2px, 1px); }
-      50% { transform: translate(-3px, -2px); }
-      75% { transform: translate(1px, 2px); }
-    }
-    @keyframes scanline {
-      from { top: 0; }
-      to { top: 100%; }
-    }
-    @keyframes load-bar {
-      0% { width: 0%; }
-      30% { width: 45%; }
-      60% { width: 70%; }
-      100% { width: 100%; }
-    }
-    @keyframes fade-in {
-      from { opacity: 0; }
-      to { opacity: 1; }
+
+    @keyframes doodle-fall {
+      0% { opacity: 0; transform: translateY(0) rotate(0deg); }
+      15% { opacity: 0.5; }
+      100% { opacity: 0; transform: translateY(110vh) rotate(var(--rot, 90deg)); }
     }
 
     /* Hide main content until splash is done */
@@ -537,6 +601,58 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    /* ─── Music toggle button ─── */
+    .music-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 100;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid var(--accent-dim);
+      background: var(--bg-card);
+      color: var(--fg-dim);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      backdrop-filter: blur(8px);
+    }
+
+    .music-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 4px 20px var(--accent-glow);
+      transform: scale(1.08);
+    }
+
+    .music-btn.playing {
+      border-color: var(--accent);
+      color: var(--accent);
+      animation: music-pulse 2s ease-in-out infinite;
+    }
+
+    .music-btn svg { width: 20px; height: 20px; }
+
+    @keyframes music-pulse {
+      0%, 100% { box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+      50% { box-shadow: 0 0 16px var(--accent-glow), 0 4px 16px rgba(0,0,0,0.3); }
+    }
+
+    /* Hidden YouTube player */
+    .yt-hidden-player {
+      position: fixed;
+      top: -9999px;
+      left: -9999px;
+      width: 1px;
+      height: 1px;
+      pointer-events: none;
+      opacity: 0;
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.01ms !important;
@@ -552,11 +668,28 @@
 
 <!-- ─── Splash intro ─── -->
 <div class="splash" id="splash">
-  <div class="splash-scanline"></div>
-  <div class="splash-logo">FAKEBTC</div>
-  <div class="splash-bar-track"><div class="splash-bar-fill"></div></div>
-  <div class="splash-tagline">Loading gear&hellip;</div>
+  <div class="splash-rain" id="splash-rain"></div>
+  <div class="splash-center">
+    <div class="splash-title">FAKEBTC</div>
+    <div class="splash-sub">Gear up &middot; Game on</div>
+  </div>
 </div>
+
+<!-- ─── Music toggle ─── -->
+<button class="music-btn" id="music-btn" title="Toggle background music" aria-label="Toggle background music">
+  <svg id="music-icon-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 18V5l12-2v13"/>
+    <circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+  </svg>
+  <svg id="music-icon-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+    <path d="M9 18V5l12-2v13"/>
+    <circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+    <path d="M2 2l20 20" stroke-width="2.5"/>
+  </svg>
+</button>
+
+<!-- Hidden YouTube player container -->
+<div class="yt-hidden-player" id="yt-player-wrap"></div>
 
 <div class="bg-glow"></div>
 
@@ -573,7 +706,7 @@
       <img
         class="avatar"
         id="avatar-img"
-        src="https://yt3.googleusercontent.com/A4z22oXP7Z1ZDOvZymTm2mRrGx4US0Wb_f9ZGRrGWAAVtfXHJJNiLIvlRMxKfTRnmVFLNo1W=s160-c-k-c0x00ffffff-no-rj"
+        src="https://yt3.googleusercontent.com/ytc/AIdro_nRqSGjhKl5t2m_v4j5RqXqT_UHs-mFGsN5v-rWfIQzVBk=s176-c-k-c0x00ffffff-no-rj"
         alt="FakeBTC"
         onerror="this.style.display='none'; document.getElementById('avatar-fallback').style.display='flex';"
       >
@@ -604,8 +737,9 @@
   HOW TO ADD A NEW SOCIAL LINK:
   Open links.json and add an entry like this:
 
-  { "name": "Twitter", "url": "https://twitter.com/yourname", "icon": "twitter" }
+  { "name": "Twitter", "url": "https://twitter.com/yourname", "icon": "twitter", "row": 2 }
 
+  row: 1 = featured top row (full width), 2 = second row
   Built-in icons: instagram, kick, youtube, store
   For a new icon, add its SVG to the LINK_ICONS object below.
 
@@ -620,7 +754,6 @@
     "description": "Short description of the product.",
     "image": "https://m.media-amazon.com/images/I/XXXXX._SL1500_.jpg",
     "link": "https://www.amazon.in/dp/XXXXXX",
-    "price": "₹X,XXX",
     "badge": "Tag"
   }
 
@@ -633,10 +766,10 @@
 
 // ─── Social links ───
 const FALLBACK_LINKS = [
-  { "name": "Instagram", "url": "https://instagram.com/fake__btc", "icon": "instagram" },
-  { "name": "Kick", "url": "https://kick.com/fakebtc", "icon": "kick" },
-  { "name": "YouTube", "url": "https://www.youtube.com/@FakebtcOG", "icon": "youtube" },
-  { "name": "Account Store", "url": "https://chat.whatsapp.com/E0avBhepJ7u6HAfgn4U674", "icon": "store" }
+  { "name": "Full Screen Live on KICK", "url": "https://kick.com/fakebtc", "icon": "kick", "row": 1 },
+  { "name": "YouTube", "url": "https://www.youtube.com/@FakebtcOG", "icon": "youtube", "row": 2 },
+  { "name": "Account Store", "url": "https://chat.whatsapp.com/E0avBhepJ7u6HAfgn4U674", "icon": "store", "row": 2 },
+  { "name": "Instagram", "url": "https://instagram.com/fake__btc", "icon": "instagram", "row": 2 }
 ];
 
 var LINK_ICONS = {
@@ -659,14 +792,30 @@ function renderLinks(links) {
   var bar = document.getElementById('social-bar');
   bar.innerHTML = '';
 
+  // Group links by row
+  var rows = {};
   links.forEach(function(l) {
-    var a = document.createElement('a');
-    a.className = 'social-btn';
-    a.href = l.url;
-    a.target = '_blank';
-    a.rel = 'noopener';
-    a.innerHTML = (LINK_ICONS[l.icon] || '') + '\n      ' + esc(l.name);
-    bar.appendChild(a);
+    var r = l.row || 1;
+    if (!rows[r]) rows[r] = [];
+    rows[r].push(l);
+  });
+
+  // Render each row
+  Object.keys(rows).sort().forEach(function(r) {
+    var rowDiv = document.createElement('div');
+    rowDiv.className = 'social-row';
+
+    rows[r].forEach(function(l) {
+      var a = document.createElement('a');
+      a.className = 'social-btn' + (l.row === 1 ? ' featured' : '');
+      a.href = l.url;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.innerHTML = (LINK_ICONS[l.icon] || '') + '\n      ' + esc(l.name);
+      rowDiv.appendChild(a);
+    });
+
+    bar.appendChild(rowDiv);
   });
 }
 
@@ -680,7 +829,6 @@ const FALLBACK_PRODUCTS = [
     "description": "14mm drivers optimized for immersive gaming audio. Comes with 4 ear tip sizes, hard shell case, and low-profile 90° plug.",
     "image": "https://m.media-amazon.com/images/I/51yTmP2wmTL._AC_SL1500_.jpg",
     "link": "https://www.amazon.in/HyperX-Earbuds-Gaming-Mic-Black-70N24Aa/dp/B0C14FS8FP",
-    "price": "₹1,999",
     "badge": "Gaming"
   },
   {
@@ -690,7 +838,6 @@ const FALLBACK_PRODUCTS = [
     "description": "Full HD 1080p video calls with Carl Zeiss optics. 78° field of view, dual stereo mics, and automatic light correction.",
     "image": "https://m.media-amazon.com/images/I/71iNwni9TsL._SL1500_.jpg",
     "link": "https://www.amazon.in/Logitech-C920-Pro-Webcam-Microphones/dp/B006JH8T3S/",
-    "price": "₹8,999",
     "badge": "Streaming"
   }
 ];
@@ -737,7 +884,7 @@ function renderProducts(products) {
         '<h2 class="product-name">' + esc(p.name) + '</h2>' +
         '<p class="product-desc">' + esc(p.description) + '</p>' +
         '<div class="product-footer">' +
-          '<span class="product-price">' + esc(p.price) + '</span>' +
+          '<span class="view-label">View on Amazon</span>' +
           '<span class="buy-arrow">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>' +
           '</span>' +
@@ -748,9 +895,164 @@ function renderProducts(products) {
   });
 }
 
+// ─── Kick live check ───
+var KICK_CHANNEL = 'fakebtc';
+
+function checkKickLive() {
+  fetch('https://kick.com/api/v1/channels/' + KICK_CHANNEL)
+    .then(function(r) { if (!r.ok) throw new Error(); return r.json(); })
+    .then(function(data) {
+      if (data && data.livestream && data.livestream.is_live) {
+        showLivePreview(data.livestream);
+      }
+    })
+    .catch(function() {
+      // CORS blocked or API unavailable — no preview shown, that's fine
+    });
+}
+
+function showLivePreview(stream) {
+  // Find the featured Kick button (row 1)
+  var kickBtn = document.querySelector('.social-btn.featured');
+  if (!kickBtn) return;
+
+  // Add live glow to the button
+  kickBtn.classList.add('is-live');
+
+  // Update button text to show LIVE
+  kickBtn.innerHTML =
+    LINK_ICONS.kick +
+    '<span class="live-dot" style="margin-left:4px"></span> LIVE NOW — Watch on Kick';
+
+  // Create mini preview below the button
+  var mini = document.createElement('div');
+  mini.className = 'live-mini';
+
+  var viewers = stream.viewer_count || 0;
+  var title = stream.session_title || '';
+
+  mini.innerHTML =
+    '<div class="live-mini-header">' +
+      '<span class="live-dot"></span>' +
+      (title ? '<span>' + esc(title) + '</span>' : '<span>LIVE</span>') +
+      (viewers > 0 ? '<span class="live-mini-viewer">' + viewers + ' watching</span>' : '') +
+    '</div>' +
+    '<div class="live-mini-embed">' +
+      '<iframe src="https://player.kick.com/' + KICK_CHANNEL + '" allowfullscreen scrolling="no"></iframe>' +
+    '</div>';
+
+  // Insert after the Kick button's parent row
+  var row = kickBtn.parentElement;
+  row.after(mini);
+}
+
+// ─── Splash: falling gaming doodles ───
+(function() {
+  var DOODLES = [
+    // Controller
+    '<svg viewBox="0 0 32 32"><path d="M6 12a4 4 0 014-4h12a4 4 0 014 4v4a8 8 0 01-8 8h-4a8 8 0 01-8-8z"/><circle cx="11" cy="14" r="1.5"/><circle cx="21" cy="14" r="1.5"/><path d="M14 18h4"/></svg>',
+    // Headset
+    '<svg viewBox="0 0 32 32"><path d="M6 18v-4a10 10 0 0120 0v4"/><rect x="4" y="17" width="4" height="7" rx="2"/><rect x="24" y="17" width="4" height="7" rx="2"/><path d="M28 24v1a3 3 0 01-3 3h-4"/></svg>',
+    // Mouse
+    '<svg viewBox="0 0 32 32"><rect x="9" y="6" width="14" height="22" rx="7"/><line x1="16" y1="6" x2="16" y2="14"/><line x1="9" y1="14" x2="23" y2="14"/></svg>',
+    // Keyboard key
+    '<svg viewBox="0 0 32 32"><rect x="4" y="8" width="24" height="16" rx="3"/><rect x="8" y="12" width="5" height="4" rx="1"/><rect x="15" y="12" width="9" height="4" rx="1"/><rect x="8" y="18" width="16" height="3" rx="1"/></svg>',
+    // Monitor
+    '<svg viewBox="0 0 32 32"><rect x="4" y="6" width="24" height="16" rx="2"/><line x1="16" y1="22" x2="16" y2="27"/><line x1="10" y1="27" x2="22" y2="27"/></svg>',
+    // Lightning bolt
+    '<svg viewBox="0 0 32 32"><path d="M18 4L8 18h7l-1 10 10-14h-7z"/></svg>',
+    // Star
+    '<svg viewBox="0 0 32 32"><path d="M16 4l3.5 7.5L28 13l-6 5.5 1.5 8.5-7.5-4-7.5 4 1.5-8.5-6-5.5 8.5-1.5z"/></svg>',
+    // Crosshair
+    '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="8"/><circle cx="16" cy="16" r="2"/><line x1="16" y1="4" x2="16" y2="10"/><line x1="16" y1="22" x2="16" y2="28"/><line x1="4" y1="16" x2="10" y2="16"/><line x1="22" y1="16" x2="28" y2="16"/></svg>'
+  ];
+
+  var rain = document.getElementById('splash-rain');
+  if (!rain) return;
+
+  for (var i = 0; i < 18; i++) {
+    var d = document.createElement('div');
+    d.className = 'doodle';
+    d.innerHTML = DOODLES[i % DOODLES.length];
+    d.style.left = (Math.random() * 90 + 5) + '%';
+    d.style.animationDelay = (Math.random() * 0.8) + 's';
+    d.style.setProperty('--rot', (Math.random() * 180 - 90) + 'deg');
+    d.style.transform = 'scale(' + (0.6 + Math.random() * 0.6) + ')';
+    rain.appendChild(d);
+  }
+})();
+
+// ─── Background music (YouTube IFrame API) ───
+var BG_MUSIC_VIDEO_ID = '7asP7Xw9emQ';
+var BG_MUSIC_VOLUME = 5; // 0–100
+var bgPlayer = null;
+var bgMusicPlaying = false;
+var bgPlayerReady = false;
+
+// Load YouTube IFrame API
+var ytScript = document.createElement('script');
+ytScript.src = 'https://www.youtube.com/iframe_api';
+document.head.appendChild(ytScript);
+
+function onYouTubeIframeAPIReady() {
+  bgPlayer = new YT.Player('yt-player-wrap', {
+    height: '1',
+    width: '1',
+    videoId: BG_MUSIC_VIDEO_ID,
+    playerVars: {
+      autoplay: 0,
+      loop: 1,
+      playlist: BG_MUSIC_VIDEO_ID, // needed for loop to work
+      controls: 0,
+      disablekb: 1,
+      fs: 0,
+      modestbranding: 1,
+      rel: 0
+    },
+    events: {
+      onReady: function(e) {
+        bgPlayerReady = true;
+        e.target.setVolume(BG_MUSIC_VOLUME);
+      },
+      onStateChange: function(e) {
+        // If video ends and loop didn't kick in, restart
+        if (e.data === YT.PlayerState.ENDED && bgMusicPlaying) {
+          bgPlayer.seekTo(0);
+          bgPlayer.playVideo();
+        }
+      }
+    }
+  });
+}
+
+// Toggle button
+document.getElementById('music-btn').addEventListener('click', function() {
+  if (!bgPlayerReady) return;
+
+  var btn = document.getElementById('music-btn');
+  var iconOff = document.getElementById('music-icon-off');
+  var iconOn = document.getElementById('music-icon-on');
+
+  if (bgMusicPlaying) {
+    bgPlayer.pauseVideo();
+    bgMusicPlaying = false;
+    btn.classList.remove('playing');
+    iconOff.style.display = '';
+    iconOn.style.display = 'none';
+  } else {
+    bgPlayer.setVolume(BG_MUSIC_VOLUME);
+    bgPlayer.playVideo();
+    bgMusicPlaying = true;
+    btn.classList.add('playing');
+    iconOff.style.display = 'none';
+    iconOn.style.display = '';
+  }
+});
+
 // Load data in background while splash plays
 loadLinks();
 loadProducts();
+checkKickLive();
 
 // Dismiss splash after animation completes (~1.2s)
 setTimeout(function() {
