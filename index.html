@@ -936,8 +936,12 @@ function showLivePreview(stream) {
   var row = kickBtn.parentElement;
   row.after(mini);
 
-  // Stop MP3 since Kick is now live
-  updateMusicUI();
+  // Stop MP3 since Kick is now live with its own audio
+  if (musicPlaying) {
+    bgMusic.pause();
+    musicPlaying = false;
+    setMusicIcon(false);
+  }
 }
 
 // ─── Splash: falling gaming doodles ───
@@ -983,47 +987,44 @@ function showLivePreview(stream) {
 //   Mute btn   → mutes/unmutes whichever source is active
 
 var bgMusic = document.getElementById('bg-music');
-var isMuted = false;      // auto-play after splash
-var isKickLive = false;   // updated by checkKickLive()
-var BG_VOLUME = 0.25;     // 25%
+var musicPlaying = false;
+var isKickLive = false;
+var BG_VOLUME = 0.25; // 25%
 
 bgMusic.volume = BG_VOLUME;
 
-// Listen for first interaction to unlock audio
-document.addEventListener('click', function onFirstClick() {
-  document.removeEventListener('click', onFirstClick);
-  if (!isMuted && !isKickLive) {
-    bgMusic.play().catch(function() {});
-  }
-}, { once: true });
-
-function updateMusicUI() {
+function setMusicIcon(playing) {
   var btn = document.getElementById('music-btn');
   var iconMuted = document.getElementById('icon-muted');
   var iconUnmuted = document.getElementById('icon-unmuted');
-
-  if (isMuted || isKickLive) {
-    // Muted, or Kick is live (MP3 paused)
-    bgMusic.pause();
-    btn.classList.remove('unmuted');
-    iconMuted.style.display = '';
-    iconUnmuted.style.display = 'none';
-  } else {
-    // Play MP3
-    bgMusic.volume = BG_VOLUME;
-    bgMusic.play().catch(function() {});
+  if (playing) {
     btn.classList.add('unmuted');
     iconMuted.style.display = 'none';
     iconUnmuted.style.display = '';
+  } else {
+    btn.classList.remove('unmuted');
+    iconMuted.style.display = '';
+    iconUnmuted.style.display = 'none';
   }
 }
 
-// Toggle mute/unmute — controls MP3 only
-// Kick player has its own volume controls inside the iframe
+// Simple toggle: click to play/pause MP3
 document.getElementById('music-btn').addEventListener('click', function() {
-  if (isKickLive) return; // button does nothing when Kick is live — use Kick's own controls
-  isMuted = !isMuted;
-  updateMusicUI();
+  if (musicPlaying) {
+    bgMusic.pause();
+    musicPlaying = false;
+    setMusicIcon(false);
+  } else {
+    bgMusic.volume = BG_VOLUME;
+    bgMusic.play().then(function() {
+      musicPlaying = true;
+      setMusicIcon(true);
+    }).catch(function() {
+      // Autoplay blocked — try again on next click
+      musicPlaying = false;
+      setMusicIcon(false);
+    });
+  }
 });
 
 // Load data in background while splash plays
@@ -1040,15 +1041,7 @@ setTimeout(function() {
   // Clean up splash from DOM after fade-out
   setTimeout(function() { splash.remove(); }, 500);
 
-  // Try to auto-play music after splash (may need user click)
-  if (!isMuted && !isKickLive) {
-    bgMusic.play().then(function() {
-      updateMusicUI();
-    }).catch(function() {
-      // Browser blocked autoplay — music starts on first click
-    });
-  }
-  updateMusicUI();
+  // Music starts when user clicks the sound button
 }, 1200);
 </script>
 </body>
