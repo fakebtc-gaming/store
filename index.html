@@ -629,7 +629,7 @@
       transform: scale(1.08);
     }
 
-    .music-btn.playing {
+    .music-btn.unmuted {
       border-color: var(--accent);
       color: var(--accent);
       animation: music-pulse 2s ease-in-out infinite;
@@ -640,17 +640,6 @@
     @keyframes music-pulse {
       0%, 100% { box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
       50% { box-shadow: 0 0 16px var(--accent-glow), 0 4px 16px rgba(0,0,0,0.3); }
-    }
-
-    /* Hidden YouTube player */
-    .yt-hidden-player {
-      position: fixed;
-      top: -9999px;
-      left: -9999px;
-      width: 1px;
-      height: 1px;
-      pointer-events: none;
-      opacity: 0;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -675,21 +664,26 @@
   </div>
 </div>
 
-<!-- ─── Music toggle ─── -->
-<button class="music-btn" id="music-btn" title="Toggle background music" aria-label="Toggle background music">
-  <svg id="music-icon-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M9 18V5l12-2v13"/>
-    <circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+<!-- ─── Background music (MP3) ─── -->
+<audio id="bg-music" loop preload="auto">
+  <source src="music.mp3" type="audio/mpeg">
+</audio>
+
+<!-- ─── Mute/Unmute toggle ─── -->
+<button class="music-btn" id="music-btn" title="Toggle sound" aria-label="Toggle sound">
+  <!-- Speaker icon (unmuted state) -->
+  <svg id="icon-unmuted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+    <path d="M15.54 8.46a5 5 0 010 7.07"/>
+    <path d="M19.07 4.93a10 10 0 010 14.14"/>
   </svg>
-  <svg id="music-icon-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
-    <path d="M9 18V5l12-2v13"/>
-    <circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
-    <path d="M2 2l20 20" stroke-width="2.5"/>
+  <!-- Muted icon (default) -->
+  <svg id="icon-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+    <line x1="23" y1="9" x2="17" y2="15"/>
+    <line x1="17" y1="9" x2="23" y2="15"/>
   </svg>
 </button>
-
-<!-- Hidden YouTube player container -->
-<div class="yt-hidden-player" id="yt-player-wrap"></div>
 
 <div class="bg-glow"></div>
 
@@ -916,6 +910,9 @@ function showLivePreview(stream) {
   var kickBtn = document.querySelector('.social-btn.featured');
   if (!kickBtn) return;
 
+  // Mark as live — this switches audio source
+  isKickLive = true;
+
   // Add live glow to the button
   kickBtn.classList.add('is-live');
 
@@ -924,7 +921,7 @@ function showLivePreview(stream) {
     LINK_ICONS.kick +
     '<span class="live-dot" style="margin-left:4px"></span> LIVE NOW — Watch on Kick';
 
-  // Create mini preview below the button
+  // Create mini preview below the button (iframe starts muted)
   var mini = document.createElement('div');
   mini.className = 'live-mini';
 
@@ -938,12 +935,15 @@ function showLivePreview(stream) {
       (viewers > 0 ? '<span class="live-mini-viewer">' + viewers + ' watching</span>' : '') +
     '</div>' +
     '<div class="live-mini-embed">' +
-      '<iframe src="https://player.kick.com/' + KICK_CHANNEL + '" allowfullscreen scrolling="no"></iframe>' +
+      '<iframe src="https://player.kick.com/' + KICK_CHANNEL + '?muted=true" allowfullscreen scrolling="no"></iframe>' +
     '</div>';
 
   // Insert after the Kick button's parent row
   var row = kickBtn.parentElement;
   row.after(mini);
+
+  // Update audio state (stop MP3 if user had unmuted)
+  updateAudioState();
 }
 
 // ─── Splash: falling gaming doodles ───
@@ -982,71 +982,77 @@ function showLivePreview(stream) {
   }
 })();
 
-// ─── Background music (YouTube IFrame API) ───
-var BG_MUSIC_VIDEO_ID = '7asP7Xw9emQ';
-var BG_MUSIC_VOLUME = 5; // 0–100
-var bgPlayer = null;
-var bgMusicPlaying = false;
-var bgPlayerReady = false;
+// ─── Audio system ───
+// Rules:
+//   Kick LIVE  → mute MP3, let Kick iframe play with sound
+//   Kick OFF   → play MP3 at 25% volume, looped
+//   Mute btn   → mutes/unmutes whichever source is active
 
-// Load YouTube IFrame API
-var ytScript = document.createElement('script');
-ytScript.src = 'https://www.youtube.com/iframe_api';
-document.head.appendChild(ytScript);
+var bgMusic = document.getElementById('bg-music');
+var isMuted = true;       // start muted (need user click)
+var isKickLive = false;   // updated by checkKickLive()
+var BG_VOLUME = 0.25;     // 25%
 
-function onYouTubeIframeAPIReady() {
-  bgPlayer = new YT.Player('yt-player-wrap', {
-    height: '1',
-    width: '1',
-    videoId: BG_MUSIC_VIDEO_ID,
-    playerVars: {
-      autoplay: 0,
-      loop: 1,
-      playlist: BG_MUSIC_VIDEO_ID, // needed for loop to work
-      controls: 0,
-      disablekb: 1,
-      fs: 0,
-      modestbranding: 1,
-      rel: 0
-    },
-    events: {
-      onReady: function(e) {
-        bgPlayerReady = true;
-        e.target.setVolume(BG_MUSIC_VOLUME);
-      },
-      onStateChange: function(e) {
-        // If video ends and loop didn't kick in, restart
-        if (e.data === YT.PlayerState.ENDED && bgMusicPlaying) {
-          bgPlayer.seekTo(0);
-          bgPlayer.playVideo();
+bgMusic.volume = BG_VOLUME;
+
+function updateAudioState() {
+  var btn = document.getElementById('music-btn');
+  var iconMuted = document.getElementById('icon-muted');
+  var iconUnmuted = document.getElementById('icon-unmuted');
+
+  if (isMuted) {
+    // Mute everything
+    bgMusic.pause();
+    muteKickIframe(true);
+    btn.classList.remove('unmuted');
+    iconMuted.style.display = '';
+    iconUnmuted.style.display = 'none';
+  } else {
+    btn.classList.add('unmuted');
+    iconMuted.style.display = 'none';
+    iconUnmuted.style.display = '';
+
+    if (isKickLive) {
+      // Kick is live → mute MP3, unmute Kick iframe
+      bgMusic.pause();
+      muteKickIframe(false);
+    } else {
+      // No live → play MP3
+      bgMusic.volume = BG_VOLUME;
+      bgMusic.play().catch(function() {});
+      muteKickIframe(true);
+    }
+  }
+}
+
+function muteKickIframe(mute) {
+  var iframe = document.querySelector('.live-mini-embed iframe');
+  if (!iframe) return;
+  try {
+    var src = iframe.src;
+    // Add or update muted param in the Kick player URL
+    if (mute) {
+      if (src.indexOf('muted=true') === -1) {
+        iframe.src = src.replace('muted=false', 'muted=true');
+        if (iframe.src === src && src.indexOf('muted=') === -1) {
+          iframe.src = src + (src.indexOf('?') > -1 ? '&' : '?') + 'muted=true';
+        }
+      }
+    } else {
+      if (src.indexOf('muted=false') === -1) {
+        iframe.src = src.replace('muted=true', 'muted=false');
+        if (iframe.src === src && src.indexOf('muted=') === -1) {
+          iframe.src = src + (src.indexOf('?') > -1 ? '&' : '?') + 'muted=false';
         }
       }
     }
-  });
+  } catch(e) {}
 }
 
-// Toggle button
+// Toggle mute/unmute on click
 document.getElementById('music-btn').addEventListener('click', function() {
-  if (!bgPlayerReady) return;
-
-  var btn = document.getElementById('music-btn');
-  var iconOff = document.getElementById('music-icon-off');
-  var iconOn = document.getElementById('music-icon-on');
-
-  if (bgMusicPlaying) {
-    bgPlayer.pauseVideo();
-    bgMusicPlaying = false;
-    btn.classList.remove('playing');
-    iconOff.style.display = '';
-    iconOn.style.display = 'none';
-  } else {
-    bgPlayer.setVolume(BG_MUSIC_VOLUME);
-    bgPlayer.playVideo();
-    bgMusicPlaying = true;
-    btn.classList.add('playing');
-    iconOff.style.display = 'none';
-    iconOn.style.display = '';
-  }
+  isMuted = !isMuted;
+  updateAudioState();
 });
 
 // Load data in background while splash plays
