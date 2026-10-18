@@ -929,15 +929,15 @@ function showLivePreview(stream) {
       (viewers > 0 ? '<span class="live-mini-viewer">' + viewers + ' watching</span>' : '') +
     '</div>' +
     '<div class="live-mini-embed">' +
-      '<iframe src="https://player.kick.com/' + KICK_CHANNEL + '?muted=true" allowfullscreen scrolling="no"></iframe>' +
+      '<iframe src="https://player.kick.com/' + KICK_CHANNEL + '" allow="autoplay" allowfullscreen scrolling="no"></iframe>' +
     '</div>';
 
   // Insert after the Kick button's parent row
   var row = kickBtn.parentElement;
   row.after(mini);
 
-  // Update audio state (stop MP3 if user had unmuted)
-  updateAudioState();
+  // Stop MP3 since Kick is now live
+  updateMusicUI();
 }
 
 // ─── Splash: falling gaming doodles ───
@@ -986,77 +986,44 @@ var bgMusic = document.getElementById('bg-music');
 var isMuted = false;      // auto-play after splash
 var isKickLive = false;   // updated by checkKickLive()
 var BG_VOLUME = 0.25;     // 25%
-var hasInteracted = false; // track if user has interacted (needed for autoplay)
 
 bgMusic.volume = BG_VOLUME;
 
 // Listen for first interaction to unlock audio
 document.addEventListener('click', function onFirstClick() {
-  hasInteracted = true;
   document.removeEventListener('click', onFirstClick);
   if (!isMuted && !isKickLive) {
     bgMusic.play().catch(function() {});
   }
 }, { once: true });
 
-function updateAudioState() {
+function updateMusicUI() {
   var btn = document.getElementById('music-btn');
   var iconMuted = document.getElementById('icon-muted');
   var iconUnmuted = document.getElementById('icon-unmuted');
 
-  if (isMuted) {
-    // Mute everything
+  if (isMuted || isKickLive) {
+    // Muted, or Kick is live (MP3 paused)
     bgMusic.pause();
-    muteKickIframe(true);
     btn.classList.remove('unmuted');
     iconMuted.style.display = '';
     iconUnmuted.style.display = 'none';
   } else {
+    // Play MP3
+    bgMusic.volume = BG_VOLUME;
+    bgMusic.play().catch(function() {});
     btn.classList.add('unmuted');
     iconMuted.style.display = 'none';
     iconUnmuted.style.display = '';
-
-    if (isKickLive) {
-      // Kick is live → mute MP3, unmute Kick iframe
-      bgMusic.pause();
-      muteKickIframe(false);
-    } else {
-      // No live → play MP3
-      bgMusic.volume = BG_VOLUME;
-      bgMusic.play().catch(function() {});
-      muteKickIframe(true);
-    }
   }
 }
 
-function muteKickIframe(mute) {
-  var iframe = document.querySelector('.live-mini-embed iframe');
-  if (!iframe) return;
-  try {
-    var src = iframe.src;
-    // Add or update muted param in the Kick player URL
-    if (mute) {
-      if (src.indexOf('muted=true') === -1) {
-        iframe.src = src.replace('muted=false', 'muted=true');
-        if (iframe.src === src && src.indexOf('muted=') === -1) {
-          iframe.src = src + (src.indexOf('?') > -1 ? '&' : '?') + 'muted=true';
-        }
-      }
-    } else {
-      if (src.indexOf('muted=false') === -1) {
-        iframe.src = src.replace('muted=true', 'muted=false');
-        if (iframe.src === src && src.indexOf('muted=') === -1) {
-          iframe.src = src + (src.indexOf('?') > -1 ? '&' : '?') + 'muted=false';
-        }
-      }
-    }
-  } catch(e) {}
-}
-
-// Toggle mute/unmute on click
+// Toggle mute/unmute — controls MP3 only
+// Kick player has its own volume controls inside the iframe
 document.getElementById('music-btn').addEventListener('click', function() {
+  if (isKickLive) return; // button does nothing when Kick is live — use Kick's own controls
   isMuted = !isMuted;
-  updateAudioState();
+  updateMusicUI();
 });
 
 // Load data in background while splash plays
@@ -1076,13 +1043,12 @@ setTimeout(function() {
   // Try to auto-play music after splash (may need user click)
   if (!isMuted && !isKickLive) {
     bgMusic.play().then(function() {
-      hasInteracted = true;
-      updateAudioState();
+      updateMusicUI();
     }).catch(function() {
       // Browser blocked autoplay — music starts on first click
     });
   }
-  updateAudioState();
+  updateMusicUI();
 }, 1200);
 </script>
 </body>
