@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FakeBTC Store</title>
+  <meta name="description" content="FakeBTC — Gear up with the best gaming peripherals and streaming equipment.">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Inter:wght@400;500;600&display=swap">
+  <style>
+    /* Dark gaming store — cyan neon on deep slate */
+    :root {
+      --bg: #0c0e14;
+      --bg-card: #141722;
+      --bg-card-hover: #1a1e2e;
+      --fg: #e2e4ea;
+      --fg-dim: #7a7f92;
+      --accent: #00e5ff;
+      --accent-glow: rgba(0, 229, 255, 0.25);
+      --accent-dim: #007a8a;
+      --badge-bg: rgba(0, 229, 255, 0.12);
+      --border: rgba(255, 255, 255, 0.06);
+      --radius: 14px;
+      --font-display: 'Chakra Petch', sans-serif;
+      --font-body: 'Inter', system-ui, sans-serif;
+      color-scheme: dark;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root:not([data-theme="dark"]) {
+        --bg: #f0f2f5;
+        --bg-card: #ffffff;
+        --bg-card-hover: #f7f8fa;
+        --fg: #1a1c24;
+        --fg-dim: #6b6f80;
+        --accent: #0097a7;
+        --accent-glow: rgba(0, 151, 167, 0.18);
+        --accent-dim: #006874;
+        --badge-bg: rgba(0, 151, 167, 0.1);
+        --border: rgba(0, 0, 0, 0.08);
+        color-scheme: light;
+      }
+    }
+    :root[data-theme="light"] {
+      --bg: #f0f2f5;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f7f8fa;
+      --fg: #1a1c24;
+      --fg-dim: #6b6f80;
+      --accent: #0097a7;
+      --accent-glow: rgba(0, 151, 167, 0.18);
+      --accent-dim: #006874;
+      --badge-bg: rgba(0, 151, 167, 0.1);
+      --border: rgba(0, 0, 0, 0.08);
+      color-scheme: light;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    img { max-width: 100%; }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    /* Ambient glow background */
+    .bg-glow {
+      position: fixed;
+      top: -30%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      animation: pulse-glow 6s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.4; transform: translateX(-50%) scale(1); }
+      50% { opacity: 0.7; transform: translateX(-50%) scale(1.15); }
+    }
+
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 40px 16px 60px;
+    }
+
+    /* ─── Header ─── */
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+      animation: fade-up 0.6s ease-out both;
+    }
+
+    .avatar-ring {
+      display: inline-block;
+      padding: 3px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+      margin-bottom: 16px;
+      animation: ring-glow 4s ease-in-out infinite;
+    }
+
+    @keyframes ring-glow {
+      0%, 100% { box-shadow: 0 0 12px var(--accent-glow); }
+      50% { box-shadow: 0 0 24px var(--accent-glow), 0 0 48px rgba(0, 229, 255, 0.1); }
+    }
+
+    .avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      display: block;
+      background: var(--bg-card);
+      object-fit: cover;
+    }
+
+    .avatar-fallback {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-card);
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 28px;
+      color: var(--accent);
+      letter-spacing: -1px;
+    }
+
+    .site-title {
+      font-family: var(--font-display);
+      font-size: clamp(28px, 6vw, 38px);
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin: 0 0 4px;
+      background: linear-gradient(135deg, var(--fg), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .site-subtitle {
+      color: var(--fg-dim);
+      font-size: 14px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ─── Social bar ─── */
+    .social-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 36px;
+      animation: fade-up 0.6s ease-out 0.15s both;
+    }
+
+    .social-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 50px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--fg);
+      text-decoration: none;
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.25s ease;
+    }
+
+    .social-btn:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px var(--accent-glow);
+    }
+
+    .social-btn svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    /* ─── Section label ─── */
+    .section-label {
+      font-family: var(--font-display);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: fade-up 0.6s ease-out 0.3s both;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--accent-dim), transparent);
+    }
+
+    /* ─── Product grid ─── */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+      gap: 16px;
+    }
+
+    .product-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      text-decoration: none;
+      color: var(--fg);
+      transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      display: flex;
+      flex-direction: column;
+      animation: fade-up 0.5s ease-out both;
+      position: relative;
+    }
+
+    .product-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius);
+      padding: 1px;
+      background: linear-gradient(135deg, transparent, var(--accent), transparent);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      pointer-events: none;
+    }
+
+    .product-card:hover::before { opacity: 1; }
+
+    .product-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.3), 0 0 30px var(--accent-glow);
+      background: var(--bg-card-hover);
+    }
+
+    .product-img-wrap {
+      position: relative;
+      aspect-ratio: 4 / 3;
+      background: var(--bg);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .product-img-wrap img {
+      max-width: 80%;
+      max-height: 80%;
+      object-fit: contain;
+      transition: transform 0.4s ease;
+    }
+
+    .product-card:hover .product-img-wrap img { transform: scale(1.08); }
+
+    .product-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      padding: 4px 12px;
+      border-radius: 50px;
+      background: var(--badge-bg);
+      color: var(--accent);
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      z-index: 1;
+    }
+
+    .img-placeholder {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: var(--fg-dim);
+      font-size: 13px;
+      text-align: center;
+      padding: 20px 16px;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: linear-gradient(135deg, var(--card-bg) 0%, color-mix(in srgb, var(--accent) 8%, var(--card-bg)) 100%);
+    }
+
+    .product-info {
+      padding: 16px 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .product-category {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--fg-dim);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    .product-name {
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .product-desc {
+      font-size: 13px;
+      color: var(--fg-dim);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .product-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+      padding-top: 10px;
+    }
+
+    .product-price {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--accent);
+    }
+
+    .buy-arrow {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      flex-shrink: 0;
+    }
+
+    .product-card:hover .buy-arrow {
+      transform: translateX(3px);
+      box-shadow: 0 0 14px var(--accent-glow);
+    }
+
+    .buy-arrow svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* ─── Footer ─── */
+    .footer {
+      text-align: center;
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      color: var(--fg-dim);
+      font-size: 12px;
+      animation: fade-up 0.6s ease-out 0.5s both;
+    }
+
+    .footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    /* ─── Splash screen ─── */
+    .splash {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #0c0e14;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+    .splash.done {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .splash-logo {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 10vw, 64px);
+      font-weight: 700;
+      letter-spacing: 6px;
+      color: #00e5ff;
+      position: relative;
+      animation: glitch-text 0.4s ease-in-out 0.15s both;
+      text-shadow:
+        0 0 10px rgba(0, 229, 255, 0.6),
+        0 0 40px rgba(0, 229, 255, 0.3),
+        0 0 80px rgba(0, 229, 255, 0.15);
+    }
+    .splash-logo::before,
+    .splash-logo::after {
+      content: 'FAKEBTC';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .splash-logo::before {
+      color: #ff003c;
+      animation: glitch-1 0.8s ease-in-out 0.2s 2;
+      clip-path: inset(20% 0 30% 0);
+    }
+    .splash-logo::after {
+      color: #00ff88;
+      animation: glitch-2 0.8s ease-in-out 0.3s 2;
+      clip-path: inset(60% 0 5% 0);
+    }
+
+    .splash-scanline {
+      position: absolute;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.5), transparent);
+      top: 0;
+      animation: scanline 1.2s linear;
+    }
+
+    .splash-bar-track {
+      width: min(240px, 60vw);
+      height: 3px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .splash-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #00e5ff, #00ff88);
+      border-radius: 3px;
+      animation: load-bar 1s ease-out forwards;
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.5);
+    }
+
+    .splash-tagline {
+      font-family: var(--font-body);
+      font-size: 12px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.3);
+      animation: fade-in 0.4s ease 0.3s both;
+    }
+
+    @keyframes glitch-text {
+      0% { opacity: 0; transform: scale(0.95) translateY(8px); }
+      50% { opacity: 1; transform: scale(1.02) translateY(-2px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    @keyframes glitch-1 {
+      0%, 100% { transform: none; }
+      20% { transform: translate(-3px, -1px); }
+      40% { transform: translate(3px, 1px); }
+      60% { transform: translate(-1px, 2px); }
+      80% { transform: translate(2px, -1px); }
+    }
+    @keyframes glitch-2 {
+      0%, 100% { transform: none; }
+      25% { transform: translate(2px, 1px); }
+      50% { transform: translate(-3px, -2px); }
+      75% { transform: translate(1px, 2px); }
+    }
+    @keyframes scanline {
+      from { top: 0; }
+      to { top: 100%; }
+    }
+    @keyframes load-bar {
+      0% { width: 0%; }
+      30% { width: 45%; }
+      60% { width: 70%; }
+      100% { width: 100%; }
+    }
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Hide main content until splash is done */
+    .wrapper { opacity: 0; }
+    .wrapper.revealed {
+      opacity: 1;
+      animation: content-reveal 0.5s ease-out;
+    }
+    @keyframes content-reveal {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── Animations ─── */
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+      .bg-glow { display: none; }
+      .splash { display: none; }
+      .wrapper { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── Splash intro ─── -->
+<div class="splash" id="splash">
+  <div class="splash-scanline"></div>
+  <div class="splash-logo">FAKEBTC</div>
+  <div class="splash-bar-track"><div class="splash-bar-fill"></div></div>
+  <div class="splash-tagline">Loading gear&hellip;</div>
+</div>
+
+<div class="bg-glow"></div>
+
+<div class="wrapper" id="main-wrapper">
+  <!-- ─── Header ─── -->
+  <header class="header">
+    <div class="avatar-ring">
+      <!--
+        REPLACE THIS with your YouTube channel avatar URL:
+        1. Go to your YouTube channel
+        2. Right-click your profile picture → "Copy image address"
+        3. Paste the URL in the src below
+      -->
+      <img
+        class="avatar"
+        id="avatar-img"
+        src="https://yt3.googleusercontent.com/ytc/AIdro_nRqSGjhKl5t2m_v4j5RqXqT_UHs-mFGsN5v-rWfIQzVBk=s176-c-k-c0x00ffffff-no-rj"
+        alt="FakeBTC"
+        onerror="this.style.display='none'; document.getElementById('avatar-fallback').style.display='flex';"
+      >
+      <div class="avatar-fallback" id="avatar-fallback">FB</div>
+    </div>
+    <h1 class="site-title">FAKEBTC</h1>
+    <p class="site-subtitle">Gear up. Game on. Stream hard.</p>
+  </header>
+
+  <!-- ─── Social bar (loaded from links.json) ─── -->
+  <nav class="social-bar" id="social-bar" aria-label="Social links"></nav>
+
+  <!-- ─── Products section ─── -->
+  <div class="section-label">Recommended Gear</div>
+
+  <div class="product-grid" id="product-grid">
+    <!-- Products are loaded from products.json -->
+  </div>
+
+  <footer class="footer">
+    <p>&copy; 2026 FakeBTC &middot; Built with &#9749; and clutch plays</p>
+  </footer>
+</div>
+
+<script>
+/*
+  ════════════════════════════════════════════════════════════
+  HOW TO ADD A NEW SOCIAL LINK:
+  Open links.json and add an entry like this:
+
+  { "name": "Twitter", "url": "https://twitter.com/yourname", "icon": "twitter" }
+
+  Built-in icons: instagram, kick, youtube, store
+  For a new icon, add its SVG to the LINK_ICONS object below.
+
+  ════════════════════════════════════════════════════════════
+  HOW TO ADD A NEW PRODUCT:
+  Open products.json and add an entry like this:
+
+  {
+    "id": 3,
+    "name": "Product Name",
+    "category": "Category",
+    "description": "Short description of the product.",
+    "image": "https://m.media-amazon.com/images/I/XXXXX._SL1500_.jpg",
+    "link": "https://www.amazon.in/dp/XXXXXX",
+    "price": "₹X,XXX",
+    "badge": "Tag"
+  }
+
+  To get the Amazon image URL:
+  1. Open the Amazon product page
+  2. Right-click the main product image → "Open image in new tab"
+  3. Copy that URL (it'll start with https://m.media-amazon.com/images/...)
+  ════════════════════════════════════════════════════════════
+*/
+
+// ─── Social links ───
+const FALLBACK_LINKS = [
+  { "name": "Instagram", "url": "https://instagram.com/fake__btc", "icon": "instagram" },
+  { "name": "Kick", "url": "https://kick.com/fakebtc", "icon": "kick" },
+  { "name": "YouTube", "url": "https://www.youtube.com/@FakebtcOG", "icon": "youtube" },
+  { "name": "Account Store", "url": "https://chat.whatsapp.com/E0avBhepJ7u6HAfgn4U674", "icon": "store" }
+];
+
+var LINK_ICONS = {
+  instagram: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg>',
+  kick: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M1.2 2.4h5.4v5.4h2.7V5.1h2.7V2.4h5.4v2.7h-2.7v2.7h-2.7v2.7h2.7v2.7h2.7v2.7h-5.4v-2.7H9.3v2.7H6.6v5.4H1.2z"/></svg>',
+  youtube: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.9 31.9 0 0 0 0 12a31.9 31.9 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.9 31.9 0 0 0 24 12a31.9 31.9 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6z"/></svg>',
+  store: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/><path d="M9 22v-4h6v4"/><circle cx="12" cy="10" r="3"/></svg>'
+};
+
+function loadLinks() {
+  fetch('links.json')
+    .then(function(r) { if (!r.ok) throw new Error(); return r.json(); })
+    .then(renderLinks)
+    .catch(function() {
+      renderLinks(FALLBACK_LINKS);
+    });
+}
+
+function renderLinks(links) {
+  var bar = document.getElementById('social-bar');
+  bar.innerHTML = '';
+
+  links.forEach(function(l) {
+    var a = document.createElement('a');
+    a.className = 'social-btn';
+    a.href = l.url;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.innerHTML = (LINK_ICONS[l.icon] || '') + '\n      ' + esc(l.name);
+    bar.appendChild(a);
+  });
+}
+
+// ─── Products ───
+// Fallback data in case products.json isn't available (e.g. opening index.html directly)
+const FALLBACK_PRODUCTS = [
+  {
+    "id": 1,
+    "name": "HyperX Cloud Earbuds II",
+    "category": "Earphone",
+    "description": "14mm drivers optimized for immersive gaming audio. Comes with 4 ear tip sizes, hard shell case, and low-profile 90° plug.",
+    "image": "https://m.media-amazon.com/images/I/51Yr7xMKGjL._SL1500_.jpg",
+    "link": "https://www.amazon.in/HyperX-Earbuds-Gaming-Mic-Black-70N24Aa/dp/B0C14FS8FP",
+    "price": "₹1,999",
+    "badge": "Gaming"
+  },
+  {
+    "id": 2,
+    "name": "Logitech C920 Pro HD Webcam",
+    "category": "Webcam",
+    "description": "Full HD 1080p video calls with Carl Zeiss optics. 78° field of view, dual stereo mics, and automatic light correction.",
+    "image": "https://m.media-amazon.com/images/I/71iNwni9TsL._SL1500_.jpg",
+    "link": "https://www.amazon.in/Logitech-C920-Pro-Webcam-Microphones/dp/B006JH8T3S/",
+    "price": "₹8,999",
+    "badge": "Streaming"
+  }
+];
+
+function loadProducts() {
+  fetch('products.json')
+    .then(function(r) { if (!r.ok) throw new Error(); return r.json(); })
+    .then(renderProducts)
+    .catch(function() {
+      renderProducts(FALLBACK_PRODUCTS);
+    });
+}
+
+function esc(s) {
+  var d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function renderProducts(products) {
+  var grid = document.getElementById('product-grid');
+  grid.innerHTML = '';
+
+  products.forEach(function(p, i) {
+    var card = document.createElement('a');
+    card.className = 'product-card';
+    card.href = p.link;
+    card.target = '_blank';
+    card.rel = 'noopener';
+    card.style.animationDelay = (0.35 + i * 0.12) + 's';
+
+    card.innerHTML =
+      '<div class="product-img-wrap">' +
+        (p.badge ? '<span class="product-badge">' + esc(p.badge) + '</span>' : '') +
+        '<img src="' + esc(p.image) + '" alt="' + esc(p.name) + '" loading="lazy"' +
+        ' onerror="this.style.display=\'none\'; this.nextElementSibling.style.display=\'flex\';">' +
+        '<div class="img-placeholder">' +
+          '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>' +
+          '<span>' + esc(p.name) + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="product-info">' +
+        '<span class="product-category">' + esc(p.category) + '</span>' +
+        '<h2 class="product-name">' + esc(p.name) + '</h2>' +
+        '<p class="product-desc">' + esc(p.description) + '</p>' +
+        '<div class="product-footer">' +
+          '<span class="product-price">' + esc(p.price) + '</span>' +
+          '<span class="buy-arrow">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>' +
+          '</span>' +
+        '</div>' +
+      '</div>';
+
+    grid.appendChild(card);
+  });
+}
+
+// Load data in background while splash plays
+loadLinks();
+loadProducts();
+
+// Dismiss splash after animation completes (~1.2s)
+setTimeout(function() {
+  var splash = document.getElementById('splash');
+  var wrapper = document.getElementById('main-wrapper');
+  splash.classList.add('done');
+  wrapper.classList.add('revealed');
+  // Clean up splash from DOM after fade-out
+  setTimeout(function() { splash.remove(); }, 500);
+}, 1200);
+</script>
+</body>
+</html>

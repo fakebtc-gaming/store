@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "name": "HyperX Cloud Earbuds II",
+    "category": "Earphone",
+    "description": "14mm drivers optimized for immersive gaming audio. Comes with 4 ear tip sizes, hard shell case, and low-profile 90° plug.",
+    "image": "https://m.media-amazon.com/images/I/51Yr7xMKGjL._SL1500_.jpg",
+    "link": "https://www.amazon.in/HyperX-Earbuds-Gaming-Mic-Black-70N24Aa/dp/B0C14FS8FP",
+    "price": "₹1,999",
+    "badge": "Gaming"
+  },
+  {
+    "id": 2,
+    "name": "Logitech C920 Pro HD Webcam",
+    "category": "Webcam",
+    "description": "Full HD 1080p video calls with Carl Zeiss optics. 78° field of view, dual stereo mics, and automatic light correction.",
+    "image": "https://m.media-amazon.com/images/I/71iNwni9TsL._SL1500_.jpg",
+    "link": "https://www.amazon.in/Logitech-C920-Pro-Webcam-Microphones/dp/B006JH8T3S/",
+    "price": "₹8,999",
+    "badge": "Streaming"
+  }
+]
