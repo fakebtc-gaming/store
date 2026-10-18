@@ -989,11 +989,21 @@ function showLivePreview(stream) {
 //   Mute btn   → mutes/unmutes whichever source is active
 
 var bgMusic = document.getElementById('bg-music');
-var isMuted = true;       // start muted (need user click)
+var isMuted = false;      // auto-play after splash
 var isKickLive = false;   // updated by checkKickLive()
 var BG_VOLUME = 0.25;     // 25%
+var hasInteracted = false; // track if user has interacted (needed for autoplay)
 
 bgMusic.volume = BG_VOLUME;
+
+// Listen for first interaction to unlock audio
+document.addEventListener('click', function onFirstClick() {
+  hasInteracted = true;
+  document.removeEventListener('click', onFirstClick);
+  if (!isMuted && !isKickLive) {
+    bgMusic.play().catch(function() {});
+  }
+}, { once: true });
 
 function updateAudioState() {
   var btn = document.getElementById('music-btn');
@@ -1068,6 +1078,17 @@ setTimeout(function() {
   wrapper.classList.add('revealed');
   // Clean up splash from DOM after fade-out
   setTimeout(function() { splash.remove(); }, 500);
+
+  // Try to auto-play music after splash (may need user click)
+  if (!isMuted && !isKickLive) {
+    bgMusic.play().then(function() {
+      hasInteracted = true;
+      updateAudioState();
+    }).catch(function() {
+      // Browser blocked autoplay — music starts on first click
+    });
+  }
+  updateAudioState();
 }, 1200);
 </script>
 </body>
