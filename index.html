@@ -989,7 +989,7 @@ function showLivePreview(stream) {
 var bgMusic = document.getElementById('bg-music');
 var musicPlaying = false;
 var isKickLive = false;
-var BG_VOLUME = 0.15; // 15%
+var BG_VOLUME = 0.08; // 8%
 
 bgMusic.volume = BG_VOLUME;
 
@@ -1041,7 +1041,24 @@ setTimeout(function() {
   // Clean up splash from DOM after fade-out
   setTimeout(function() { splash.remove(); }, 500);
 
-  // Music starts when user clicks the sound button
+  // Auto-play music after splash
+  bgMusic.volume = BG_VOLUME;
+  bgMusic.play().then(function() {
+    musicPlaying = true;
+    setMusicIcon(true);
+  }).catch(function() {
+    // Browser blocked autoplay — will start on first click anywhere
+    document.addEventListener('click', function autoplayUnlock() {
+      document.removeEventListener('click', autoplayUnlock);
+      if (!musicPlaying) {
+        bgMusic.volume = BG_VOLUME;
+        bgMusic.play().then(function() {
+          musicPlaying = true;
+          setMusicIcon(true);
+        }).catch(function() {});
+      }
+    }, { once: true });
+  });
 }, 1200);
 </script>
 </body>
